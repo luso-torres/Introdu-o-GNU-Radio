@@ -1,0 +1,547 @@
+\section{Exemplos com código} % Seções são adicionadas para organizar sua apresentação em blocos discretos, todas as seções e subseções são automaticamente exibidas no índice como uma visão geral da apresentação, mas NÃO são exibidas como slides separados.
+
+
+%----------------------------------------------------------------------------------------
+    \begin{frame}[fragile]
+    \frametitle{Computing the Histrogram}
+    \begin{columns}
+
+         \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}
+#-----------------------------------
+##   Compute a histogram of an image.
+#   FAON - Jan 14th, 2023.
+#-----------------------------------
+def Compute_an_image_histogram(image, Bins):          
+    N, M = image.shape  
+    histogram = np.zeros((256), dtype = int)             
+    histogram_Bins = np.zeros((Bins), dtype = int)
+    if( Bins < 256):
+        bins_step = 256.0 / Bins        
+        for n in range(N):
+          for m in range(M):
+            histogram[image[n, m]]+= 1   
+    \end{python}
+\end{roundedcodebox}
+   \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}  
+      if( Bins == 256 ): # In that case we have already computed histogram_Bins.
+        histogram_Bins = histogram
+    else:
+        k = 0
+        i=0
+        while i < 256: 
+            while ( (i >= (int) ( k * bins_step + 0.5) ) and (i < (int) (  (k + 1) * bins_step + 0.5 ) )):
+                histogram_Bins[k] += histogram[i] 
+                i += 1                 
+            k +=1                 
+    return histogram_Bins    
+      \end{python}
+\end{roundedcodebox}
+    \end{columns}
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+    \begin{frame}[fragile]
+    \frametitle{CDF/Inversa/Probability/Shannon}
+    \begin{columns}
+
+         \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}
+def Compute_cdf(pdf, Bins):
+    cdf = np.zeros((Bins), dtype = float)
+    cdf[0] = pdf[0]
+    for k in range(1, Bins):   
+        cdf[k] = cdf[k-1]+pdf[k]
+    return cdf  
+#----------------------------------
+def Compute_inverse_cdf(cdf, probability):
+    N = cdf.shape[0]          
+    for k in range(N): 
+        if(cdf[k] > probability):
+            return k
+            '''
+            if(k > 0):
+                return k
+            else:
+                return 0  
+            ''' 
+     \end{python}
+\end{roundedcodebox}
+  \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}  
+def Compute_probability(pmf, x1, x2, Bins): 
+    probability = 0
+    if( x2 == Bins):
+        x2 = x2 - 1
+    for k in range(x1, x2 + 1):
+        probability += pmf[k]
+    return probability   
+#----------------------------------
+def Compute_Shannon_entropy(pmf, Bins):
+    epsilon = 2.2e-16
+    bins_entropy = 0
+    for i in range(Bins):
+        bins_entropy -= pmf[i] * np.log2(pmf[i] + epsilon)
+    return bins_entropy
+\end{python}
+\end{roundedcodebox}
+    \end{columns}
+\end{frame}
+
+ 
+
+
+%----------------------------------------------------------------------------------------
+
+    \begin{frame}[fragile]
+    \frametitle{Robust Mean Absolute Deviation}
+    \begin{columns}
+
+         \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}
+def Compute_Robust_Mean_Absolute
+_Deviation(image):
+    N, M = image.shape
+    image_p100 = np.percentile(image, 10.0)
+    image_p900 = np.percentile(image, 90.0)
+    #-----------------------------
+    Robust_Mean_Absolute_Deviation = 0  
+    percentile_range_10_90_pixels
+    _values = np.zeros((N * M), dtype = float)
+    k = 0
+    for n in range(N):
+        for m in range(M):
+            if( (image[n,m] >= image_p100) and (image[n, m] <= image_p900) ):                    
+     \end{python}
+\end{roundedcodebox}
+  \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}  
+                percentile_range_10_90_pixels
+                _values[k] = image[n,m]
+                k += 1
+    if(k == 0):
+        k = 1       
+    percentile_range_10_90_pixels
+    _mean = np.mean(percentile_range_10_90_pixels
+    _values)   
+    Robust_Mean_Absolute_Deviation = np.sum( abs(percentile_range_10_90_pixels
+    _values - percentile_range_10_90_pixels
+    _mean), axis = None ) / (float) (k)         
+    return Robust_Mean_Absolute_Deviation
+
+
+\end{python}
+\end{roundedcodebox}
+    \end{columns}
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+
+    \begin{frame}[fragile]
+    \frametitle{Split/Statistical}
+    \begin{columns}
+
+         \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}
+def split_population(image, x1, x2):
+    N, M = image.shape 
+    x_pop = np.zeros((3, N * M), dtype = int)
+    k1 = 0
+    k2 = 0
+    k3 = 0
+    for n in range(N):
+        for m in range(M):
+            if(image[n, m] <= x1):
+                x_pop[0, k1] = image[n,m]
+                k1 += 1
+            elif ( (image[n,m] > x1) and (image[n, m] <= x2) ): 
+                x_pop[1, k2] = image[n,m]  
+                k2 += 1
+            else:
+                x_pop[2, k3] = image[n,m]  
+                k3 += 1            
+    population_size = [k1, k2, k3]  
+    return population_size, x_pop 
+     \end{python}
+\end{roundedcodebox}
+  \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}  
+def calculates_statistical_quantities
+_of_a_population(x, x1, x2, N): 
+    if( x1 == 0):
+        M = x2 - x1 + 1
+    else:
+       M = x2 - x1          
+    histogram = np.zeros((M), dtype = int)  
+    #------------------------
+    #   Compute the histogram using 256 bins.
+    #------------------------
+    if( x1 == 0):
+        for n in range(N):
+            histogram[x[n]] += 1  
+    else:
+        for n in range(N):
+            histogram[x[n] - x1 - 1] += 1 
+pmf = histogram/N
+\end{python}
+\end{roundedcodebox}
+    \end{columns}
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]
+    \frametitle{Features}
+\begin{columns}
+  \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}  
+    #---------------------------
+    # Statistical mean.
+    #---------------------------
+    sum = 0.0
+    for k in range(M):    
+         sum +=  (k + x1) * pmf[k]
+    mean = sum
+    #---------------------------
+    # Statistical variance.
+    #---------------------------
+    sum = 0.0
+    for k in range(M):    
+         sum +=  ((k + x1 - mean)**2.0) * pmf[k]
+    variance = sum    
+\end{python}
+\end{roundedcodebox}
+  \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}  
+    #---------------------------
+    # Statistical skewness.
+    #---------------------------
+    sum = 0.0
+    for k in range(M):    
+         sum +=  ((k + x1 - mean)**3.0) * pmf[k]
+    central_moment_3 = sum 
+    skewness = central_moment_3 /variance**1.5       
+    #---------------------------
+    # Statistical Kurtosis.
+    #---------------------------
+    sum = 0.0
+    for k in range(M):    
+         sum +=  ((k + x1 - mean)**4.0) * pmf[k]
+    central_moment_4 = sum 
+    kurtosis = central_moment_4 /variance**2.0              
+    return mean, variance, skewness, kurtosis   
+
+\end{python}
+\end{roundedcodebox}
+    \end{columns}
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]
+    \frametitle{Statistical Features - Code Output}
+\begin{columns}
+  \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}  
+    def Compute_Statistical_Features(image, Bins):        
+    features = []     
+    N, M = image.shape  
+    image_number_of_pixels = float(N * M) 
+    #----------------------------
+    # Compute image's hitogram using the developed method.
+    #----------------------------
+    histogram = Compute_an_image_histogram(image, Bins)        
+    #histogram_in_ascending_order = np.sort(histogram)               
+    #----------------------------
+    # Build the Power Mass Function.
+    #----------------------------
+    pmf = histogram / image_number_of_pixels
+    cdf = Compute_cdf( pmf, Bins)        
+\end{python}
+\end{roundedcodebox}
+  \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}  
+    #---------------------------
+    # It computes statistical features of Type I.
+    #---------------------------
+    image_min = np.min(image) 
+    image_max = np.max(image)
+    image_mean = round(np.mean(image), 3) 
+    image_median = (int) (np.median(image))
+    image_std = round(np.std(image), 3)  
+    image_var = round(np.var(image), 3) 
+    #---------------------------   
+    image_mode = np.argmax(pmf)
+    image_skew = round(scipy.stats.skew(image, axis = None), 3)
+    image_kurtpsis = round(scipy.stats.kurtosis(image, axis = None),3)
+    square_range = round((image_max - image_min)**2, 3)
+\end{python}
+\end{roundedcodebox}
+    \end{columns}
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+
+\begin{frame}[fragile]
+    \frametitle{Features of Type II}
+\begin{columns}
+  \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}  
+    #---------------------------   
+    # Compute Shannon entropy 2
+    #---------------------------   
+    Shannon_entropy = round(Compute_Shannon_entropy(pmf, Bins), 3)
+    #---------------------------         
+    # Normalized energy.
+    #---------------------------   
+    image_norm_energy = round((np.sum( image**2, axis = None ) / image_number_of_pixels),3)
+    #---------------------------   
+    # Root-Mean-Square (RMS) value.
+    #---------------------------   
+    image_rms = round(np.sqrt(image_norm_energy),3)  
+\end{python}
+\end{roundedcodebox}
+  \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}  
+    #---------------------------   
+    # Compute the statistics Features of Type II.
+    #---------------------------   
+           
+    #---------------------------   
+    # Compute the percentiles from image using Numpy.
+    #---------------------------   
+    image_p75 = np.percentile(image, 7.5)
+    image_p150 = np.percentile(image, 15.0)      
+    image_p850 = np.percentile(image, 85.0)        
+    image_p925 = np.percentile(image, 92.5)  
+\end{python}
+\end{roundedcodebox}
+    \end{columns}
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+\begin{frame}[fragile]
+    \frametitle{Features of Type III}
+\begin{columns}
+  \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}  
+    # It computes statistical features of Type III.
+    #---------------------------  
+      
+    #---------------------------
+    # Compute image interquartile range.
+    #---------------------------
+    image_p250 = np.percentile(image, 25.0)
+    image_p750 = np.percentile(image, 75.0)      
+    image_interquartile_range = image_p750 - image_p250
+    #---------------------------
+    # Mean Absolute Deviation from the mean.
+    #---------------------------
+    image_abs_deviation_from_the_mean = round((np.sum( np.abs(image - image_mean), axis = None ) / image_number_of_pixels),3)
+    #---------------------------
+    
+\end{python}
+\end{roundedcodebox}
+  \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}  
+    # Mean Absolute Deviation from the median.
+    #---------------------------
+    image_deviation_from_the_median = round((np.sum((image - image_median), axis = None ) / image_number_of_pixels),3)  
+    #---------------------------
+    # Compute image normalized uniformity from its histogram.
+    #---------------------------        
+    image_uniformity = round((np.sum( histogram**2, axis = None ) / image_number_of_pixels),3)          
+    #---------------------------
+    # Compute the Robust Mean Absolute Deviation (rMAD).
+    #--------------------------- 
+    Robust_Mean_Absolute_Deviation = round(Compute_Robust_Mean_Absolute
+    _Deviation(image), 3)
+    #---------------------------
+   
+\end{python}
+\end{roundedcodebox}
+    \end{columns}
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+\begin{frame}[fragile]
+    \frametitle{Features of Type IV}
+\begin{columns}
+  \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}  
+    x1 = Compute_inverse_cdf(cdf, 0.333)
+    x2 = Compute_inverse_cdf(cdf, 0.666)
+    #---------------------------                
+    # Splites the population. 
+    #---------------------------      
+    population_size, x_pop = split_population(image, x1, x2)
+    population_threshold = (int) (image_number_of_pixels/3)
+    threshold_deviation_1 = population_size[0] - population_threshold
+    threshold_deviation_2 = population_size[1] - population_threshold  
+    #threshold_deviation_3 = population_size[2] - population_threshold
+    #---------------------------
+    # Mean, variance, skeness and kurtosis of population 1.
+    #---------------------------
+\end{python}
+\end{roundedcodebox}
+  \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}  
+    x = x_pop[0,:]
+    m1, v1, s1, k1 = calculates_statistical_quantities
+    _of_a_population(x, 0, x1, population_size[0])
+    m1 = round(m1, 3) 
+    v1 = round(v1, 3) 
+    s1 = round(s1, 3)     
+    k1 = round(k1, 3)   
+    #---------------------------
+    # It computes mean, variance, skeness and kurtosis of population 2.
+    x = x_pop[1,:]
+    m2, v2, s2, k2 = calculates_statistical_quantities
+    _of_a_population(x, x1, x2, population_size[1]) 
+    m2 = round(m2, 3) 
+    v2 = round(v2, 3) 
+    s2 = round(s2, 3)     
+    k2 = round(k2, 3)      
+         
+\end{python}
+\end{roundedcodebox}
+    \end{columns}
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+\begin{frame}[fragile]
+    \frametitle{Features of Type IV}
+\begin{columns}
+  \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}  
+    #---------------------------
+    # It computes mean, variance, skeness and kurtosis of population 2.
+    #---------------------------
+    x = x_pop[2,:]  
+    m3, v3, s3, k3 = calculates_statistical_quantities
+    _of_a_population(x, x2, Bins - 1, population_size[2])  
+    m3 = round(m3, 3) 
+    v3 = round(v3, 3) 
+    s3 = round(s3, 3)     
+    k3 = round(k3, 3) 
+\end{python}
+\end{roundedcodebox}
+  \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}  
+
+\end{python}
+\end{roundedcodebox}
+    \end{columns}
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+\begin{frame}[fragile]
+    \frametitle{Python}
+\begin{columns}
+  \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}  
+    
+\end{python}
+\end{roundedcodebox}
+  \column{0.48\textwidth}  % First column
+    \begin{roundedcodebox}
+    \begin{python}  
+
+\end{python}
+\end{roundedcodebox}
+    \end{columns}
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+
+% \begin{frame}[fragile]
+%     \frametitle{C}
+    
+%     \begin{clang}
+% #include <stdio.h>
+
+% int main() {
+%     int numero = 5;
+%     int dobro = 2 * numero;
+    
+%     printf("O dobro de %d eh %d\n", numero, dobro);
+%     return 0;
+% }
+%     \end{clang}
+% \end{frame}
+
+% %----------------------------------------------------------------------------------------
+% \begin{frame}[fragile]
+%     \frametitle{C++}
+    
+%     \begin{cpp}
+% #include <iostream>
+% using namespace std;
+
+% int main() {
+%     int numero = 5;
+%     int dobro = 2 * numero;
+    
+%     cout << "O dobro de " << numero;
+%     cout << " eh " << dobro << endl;
+%     return 0;
+% }
+%     \end{cpp}
+% \end{frame}
+
+% %----------------------------------------------------------------------------------------
+% \begin{frame}[fragile]
+%     \frametitle{R}
+    
+%     \begin{rlang}
+% # Função para calcular o dobro
+% calcular_dobro <- function(x) {
+%   return(2 * x)
+% }
+
+% # Testando a função
+% numero <- 5
+% resultado <- calcular_dobro(numero)
+% print(paste("O dobro de", numero, "é", resultado))
+%     \end{rlang}
+% \end{frame}
+
+% %----------------------------------------------------------------------------------------
+
+% \begin{frame}[fragile]
+%     \frametitle{Java}
+    
+%     \begin{java}
+% public class Exemplo {
+%     public static void main(String[] args) {
+%         int numero = 5;
+%         int dobro = 2 * numero;
+        
+%         System.out.println("O dobro de " + numero +
+%                          " eh " + dobro);
+%     }
+% }
+%     \end{java}
+% \end{frame}
